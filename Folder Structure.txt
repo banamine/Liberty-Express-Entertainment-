@@ -1,0 +1,14 @@
+M3U_Matrix_Installer/
+│
+├── build_installer.py          # ← This script
+├── main.py                     # ← Your full app
+├── gemini_api.py
+├── imdb_scraper.py
+├── player/
+│   └── player-logic.js
+├── themes/
+│   ├── dark.json
+│   └── neon.json
+├── assets/
+│   └── (optional icons)
+└── requirements.txt

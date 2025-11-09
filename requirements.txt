@@ -1,0 +1,6 @@
+tkinter
+requests
+redis
+google-generativeai
+reportlab
+python-dotenv
