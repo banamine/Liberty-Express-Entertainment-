@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="FOX News Network">
+    <title>FOX News Radio - Live Audio Player</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    
+    <!-- jQuery and jPlayer -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: linear-gradient(135deg, #0a2342 0%, #1a3a5f 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        .logo {
+            max-width: 300px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #c9d1d9;
+            margin-bottom: 20px;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+        }
+        
+        .player-section {
+            flex: 1;
+            min-width: 350px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .show-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .album-art {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .show-details {
+            flex: 1;
+        }
+        
+        .on-air {
+            display: inline-block;
+            background: #e50914;
+            color: white;
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .show-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        
+        .show-description {
+            color: #c9d1d9;
+            font-size: 0.95rem;
+        }
+        
+        /* jPlayer Custom Styling */
+        .jp-flat-audio {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .jp-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .jp-play, .jp-pause {
+            background: #e50914;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4);
+        }
+        
+        .jp-play:hover, .jp-pause:hover {
+            background: #ff1a1a;
+            transform: scale(1.05);
+        }
+        
+        .jp-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .jp-seek-bar {
+            height: 100%;
+            background: #e50914;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+        
+        .jp-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #c9d1d9;
+        }
+        
+        .jp-timing {
+            text-align: right;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .volume-icon {
+            margin-right: 10px;
+            color: #c9d1d9;
+        }
+        
+        .volume-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .volume-level {
+            position: absolute;
+            height: 100%;
+            background: #e50914;
+            border-radius: 3px;
+            width: 80%;
+        }
+        
+        .sidebar {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .ad-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .ad-placeholder {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 40px 20px;
+            color: #c9d1d9;
+            font-style: italic;
+        }
+        
+        .quiz-promo {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .quiz-button {
+            display: inline-block;
+            background: #ffb800;
+            color: #0a2342;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 184, 0, 0.4);
+        }
+        
+        .quiz-button:hover {
+            background: #ffcc33;
+            transform: translateY(-2px);
+        }
+        
+        .schedule {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .schedule h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+        
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+        
+        .schedule-time {
+            font-weight: 600;
+            color: #ffb800;
+        }
+        
+        .schedule-show {
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        /* Dynamic Flourishes */
+        .dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .pulse {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(229, 9, 20, 0.1);
+            animation: pulse 8s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+        }
+        
+        .floating-logo {
+            position: absolute;
+            opacity: 0.03;
+            font-size: 10rem;
+            font-weight: 900;
+            color: white;
+            z-index: -1;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                transform: translate(100px, 100px) rotate(360deg);
+            }
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #c9d1d9;
+            font-size: 0.9rem;
+            width: 100%;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .player-section, .sidebar {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Background Elements -->
+    <div class="dynamic-bg">
+        <div class="pulse" style="width: 300px; height: 300px; top: 10%; left: 5%;"></div>
+        <div class="pulse" style="width: 200px; height: 200px; top: 70%; left: 80%; animation-delay: -2s;"></div>
+        <div class="pulse" style="width: 400px; height: 400px; top: 40%; left: 60%; animation-delay: -4s;"></div>
+        <div class="floating-logo" style="top: 20%; left: 10%;">FOX</div>
+        <div class="floating-logo" style="top: 60%; left: 70%; animation-delay: -10s;">NEWS</div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/320px-Fox_News_Channel_logo.svg.png" alt="FOX News" class="logo">
+            <h1>FOX News Radio</h1>
+            <p class="subtitle">Live Audio Stream - America's News Headquarters</p>
+        </header>
+        
+        <div class="content">
+            <div class="player-section">
+                <div class="show-info">
+                    <div class="album-art">
+                        <img id="albumCover" src="https://radio.foxnews.com/wp-content/uploads/2017/10/default_logo.png" alt="Current Show">
+                    </div>
+                    <div class="show-details">
+                        <span class="on-air">ON AIR NOW</span>
+                        <h2 class="show-title" id="showTitle">FOX News Rundown</h2>
+                        <p class="show-description" id="showDescription">The latest news and analysis from the FOX News team.</p>
+                    </div>
+                </div>
+                
+                <!-- jPlayer Audio Player -->
+                <div id="jquery_jplayer_audio_1" class="jp-jplayer"></div>
+                <div id="jp_container_audio_1" class="jp-flat-audio">
+                    <div class="jp-controls">
+                        <a class="jp-play jp-button">▶</a>
+                        <a class="jp-pause jp-button">❚❚</a>
+                    </div>
+                    <div class="jp-bar">
+                        <div class="jp-seek-bar">
+                            <div class="jp-play-bar"></div>
+                        </div>
+                    </div>
+                    <div class="jp-details">
+                        <span class="jp-title">FOX News Radio Live Stream</span>
+                        <div class="jp-timing">
+                            <span class="jp-current-time"></span> / <span class="jp-duration"></span>
+                        </div>
+                    </div>
+                    <div class="volume-control">
+                        <div class="volume-icon">🔊</div>
+                        <div class="volume-bar">
+                            <div class="volume-level"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="jp-no-solution" style="display: none;">
+                    Media Player Error<br />
+                    Update your browser or Flash plugin
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="quiz-promo">
+                    <h3>Test Your Knowledge</h3>
+                    <p>Play the FOX News Daily Quiz and see how well you know current events!</p>
+                    <a href="https://thequiz.fox" target="_blank" class="quiz-button">Play The Quiz Now</a>
+                </div>
+                
+                <div class="ad-container">
+                    <h3>Advertisement</h3>
+                    <div class="ad-placeholder">
+                        Your ad could be here
+                    </div>
+                </div>
+                
+                <div class="schedule">
+                    <h3>Today's Schedule</h3>
+                    <div class="schedule-list">
+                        <div class="schedule-item">
+                            <div class="schedule-time">6:00 AM</div>
+                            <div class="schedule-show">FOX & Friends First</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">7:00 AM</div>
+                            <div class="schedule-show">FOX & Friends</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">9:00 AM</div>
+                            <div class="schedule-show">America's Newsroom</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">12:00 PM</div>
+                            <div class="schedule-show">Outnumbered</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">5:00 PM</div>
+                            <div class="schedule-show">The Five</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 FOX News Network, LLC. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Mock data for show information (in a real implementation, this would come from an API)
+            const shows = [
+                {
+                    title: "FOX News Rundown",
+                    description: "The latest news and analysis from the FOX News team.",
+                    image: "https://radio.foxnews.com/wp-content/uploads/2017/10/default_logo.png"
+                },
+                {
+                    title: "The Brian Kilmeade Show",
+                    description: "Brian Kilmeade brings you interviews with newsmakers and FOX News contributors.",
+                    image: "https://media.foxnewsradio.com/Image/Size2/9/2/7/927c93a2-9f3f-4b3f-9c3f-9e3f9c3f9e3f.jpg"
+                },
+                {
+                    title: "The Guy Benson Show",
+                    description: "Guy Benson offers sharp political commentary and interviews.",
+                    image: "https://media.foxnewsradio.com/Image/Size2/8/2/7/827c93a2-9f3f-4b3f-9c3f-9e3f9c3f9e3f.jpg"
+                }
+            ];
+            
+            // Simulate changing shows (in a real implementation, this would be based on actual schedule)
+            let currentShowIndex = 0;
+            
+            function updateShowInfo() {
+                const show = shows[currentShowIndex];
+                $("#showTitle").text(show.title);
+                $("#showDescription").text(show.description);
+                $("#albumCover").attr("src", show.image);
+                
+                // Rotate to next show (for demo purposes)
+                currentShowIndex = (currentShowIndex + 1) % shows.length;
+            }
+            
+            // Initial show info
+            updateShowInfo();
+            
+            // Change show info every 30 seconds (for demo)
+            setInterval(updateShowInfo, 30000);
+            
+            // Audio player setup
+            const stream = {
+                title: "FOX News Radio",
+                mp3: "https://live.amperwave.net/direct/foxnewsradio-foxnewsradioaac-imc?source=fnr.web"
+            };
+            
+            $("#jquery_jplayer_audio_1").jPlayer({
+                ready: function() {
+                    $(this).jPlayer("setMedia", stream).jPlayer("play");
+                },
+                play: function() {
+                    // Avoid multiple jPlayers playing together
+                    $(this).jPlayer("pauseOthers");
+                },
+                timeFormat: {
+                    padMin: false
+                },
+                swfPath: "js",
+                supplied: "mp3",
+                cssSelectorAncestor: "#jp_container_audio_1",
+                cssSelector: {
+                    play: ".jp-play",
+                    pause: ".jp-pause",
+                    seekBar: ".jp-seek-bar",
+                    playBar: ".jp-play-bar",
+                    currentTime: ".jp-current-time",
+                    duration: ".jp-duration"
+                },
+                smoothPlayBar: true,
+                remainingDuration: true,
+                keyEnabled: true,
+                keyBindings: {
+                    // Disable some of the default key controls
+                    muted: null,
+                    volume: null,
+                    volumeUp: {
+                        key: 38, // UP
+                        fn: function(f) {
+                            f.volume(f.options.volume + 0.1);
+                        }
+                    },
+                    volumeDown: {
+                        key: 40, // DOWN
+                        fn: function(f) {
+                            f.volume(f.options.volume - 0.1);
+                        }
+                    }
+                },
+                wmode: "window"
+            });
+            
+            // Volume control
+            $(".volume-bar").on("click", function(e) {
+                const $this = $(this);
+                const pos = (e.pageX - $this.offset().left) / $this.width();
+                const volume = Math.max(0, Math.min(1, pos));
+                
+                $("#jquery_jplayer_audio_1").jPlayer("volume", volume);
+                $(".volume-level").css("width", (volume * 100) + "%");
+            });
+            
+            // Set initial volume
+            $("#jquery_jplayer_audio_1").jPlayer("volume", 0.8);
+            $(".volume-level").css("width", "80%");
+        });
+    </script>
+</body>
+</html>
